@@ -30,6 +30,24 @@ class ShellSpecSpec extends ShellSpec {
                      |'''.stripMargin()
     }
 
+    def "redirect error stream"() {
+        given:
+        redirectErrorStream true
+
+        when:
+        run 'output.sh'
+
+        then:
+        stdout == '''1
+                    |2
+                    |3
+                    |4
+                    |'''.stripMargin()
+
+        and:
+        stderr == ''
+    }
+
     def "use env"() {
         given:
         export 'FOO', 'foo'

@@ -3,7 +3,7 @@ package org.kiy0taka.spock.shell
 class ShellProc {
 
     File dir
-    List<String> env = []
+    Map<String, String> env
     List<String> mockScripts
     String preScript
     String command
@@ -11,9 +11,13 @@ class ShellProc {
     String stdout
     String stderr
     List<String> lines
+    boolean redirectErrorStream
 
     void exec() {
-        def p = 'sh'.execute(env, dir)
+        def builder = new ProcessBuilder('sh').directory(dir)
+        builder.redirectErrorStream(redirectErrorStream)
+        builder.environment() << env
+        def p = builder.start()
         p.out.withWriter { w ->
             w << 'set -a\n'
             w.flush()

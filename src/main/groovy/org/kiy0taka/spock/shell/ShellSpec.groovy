@@ -11,24 +11,22 @@ class ShellSpec extends Specification {
     public TemporaryFolder tempFolder = new TemporaryFolder()
 
     @Shared
-    static ConfigObject config = {
+    private static ConfigObject config = {
         def r = Thread.currentThread().contextClassLoader.loadClass('ShellSpecConfig')
         new ConfigSlurper().parse(r)
     }()
 
-    int status
-    String stdout
-    String stderr
-    List<String> env = []
-    List<String> mockScripts = []
-    ShellProc currentProc
+    private Map<String, String> env = [:]
+    private List<String> mockScripts = []
+    private ShellProc currentProc
+    private boolean redirectErrorStream
 
     File getWorkspace() {
         tempFolder.root
     }
 
     void export(String name, String value) {
-        env << "${name}=${value}"
+        env[name] = value
     }
 
     void mockScript(String script) {
@@ -36,7 +34,12 @@ class ShellSpec extends Specification {
     }
 
     void exec(String command) {
-        currentProc = new ShellProc(dir:tempFolder.root, env:env, mockScripts:mockScripts, command:command)
+        currentProc = new ShellProc(
+            dir:tempFolder.root,
+            env:env,
+            mockScripts:mockScripts,
+            command:command,
+            redirectErrorStream:redirectErrorStream)
         currentProc.exec()
     }
 
@@ -58,5 +61,9 @@ class ShellSpec extends Specification {
 
     List<String> getLines() {
         currentProc.lines
+    }
+
+    void redirectErrorStream(boolean redirectErrorStream) {
+        this.redirectErrorStream = redirectErrorStream
     }
 }
