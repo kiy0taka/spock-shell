@@ -1,5 +1,10 @@
 apply plugin: 'groovy'
 apply plugin: 'idea'
+apply plugin: 'maven'
+
+configurations {
+    deployerJars
+}
 
 repositories {
     mavenCentral()
@@ -9,8 +14,30 @@ repositories {
 dependencies {
     groovy 'org.codehaus.groovy:groovy-all:2.0.6'
     compile 'org.spockframework:spock-core:0.7-groovy-2.0'
+    deployerJars "org.apache.maven.wagon:wagon-ssh:1.0-beta-2"
+}
+
+group = 'org.kiy0taka.spock'
+version = '0.1-SNAPSHOT'
+
+task sourcesJar(type: Jar, dependsOn:classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        configuration = configurations.deployerJars
+        repository(url: kiy0takaRepoUrl) {
+            authentication(userName: kiy0takaRepoUserName, privateKey: kiy0takaRepoPrivateKey)
+        }
+    }
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.2'
+    gradleVersion = '1.3'
 }
