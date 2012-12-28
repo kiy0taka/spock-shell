@@ -19,7 +19,6 @@ dependencies {
 }
 
 group = 'org.kiy0taka.spock'
-version = '0.1-SNAPSHOT'
 
 task sourcesJar(type: Jar, dependsOn:classes) {
     classifier = 'sources'
