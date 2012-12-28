@@ -5,18 +5,21 @@ class ShellProc {
     File dir
     Map<String, String> env
     List<String> mockScripts
-    String preScript
     String command
     int status
     String stdout
     String stderr
-    List<String> lines
+
+    @Lazy
+    List<String> lines = { stdout.split('\n') }()
+
     boolean redirectErrorStream
 
     void exec() {
         def builder = new ProcessBuilder('sh').directory(dir)
         builder.redirectErrorStream(redirectErrorStream)
         builder.environment() << env
+
         def p = builder.start()
         p.out.withWriter { w ->
             w << 'set -a\n'
@@ -30,10 +33,9 @@ class ShellProc {
             w << 'exit $?'
             w.flush()
         }
-        status = p.waitFor()
-        stderr = p.err.text
-        stdout = p.text
-        lines = stdout.split('\n')
+
+        (status, stderr, stdout) = [p.waitFor(), p.err.text, p.text]
+
         println stdout
         System.err.println stderr
     }
