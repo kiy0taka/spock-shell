@@ -89,4 +89,13 @@ class ShellSpecSpec extends ShellSpec {
         then:
         lines[0] == 'called curl http://www.google.com'
     }
+
+    @LocalData('test1')
+    def 'use local data'() {
+        when:
+        exec 'cat hoge.txt'
+
+        then:
+        lines[0] == 'this is hoge.txt'
+    }
 }
