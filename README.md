@@ -73,5 +73,11 @@ workspace|File|Shell working directory
         then:
         lines[0] == 'called curl http://www.google.com'
 
+### Test resources
+
+Copy src/resources/test direcotry to workspace.
+
+        resources 'test'
+
 ## GENT Template
 https://github.com/kiy0taka/spock-shell.gent
