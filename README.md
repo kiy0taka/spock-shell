@@ -14,7 +14,7 @@
 
     dependencies {
         groovy 'org.codehaus.groovy:groovy-all:2.0.6'
-        testCompile 'org.kiy0taka.spock:spock-shell:0.1'
+        testCompile 'org.kiy0taka.spock:spock-shell:0.2'
     }
 
 ## Configuration
@@ -77,7 +77,7 @@ workspace|File|Shell working directory
 
 Copy src/resources/test direcotry to workspace.
 
-        resources 'test'
+    resources 'test'
 
 ## GENT Template
 https://github.com/kiy0taka/spock-shell.gent
