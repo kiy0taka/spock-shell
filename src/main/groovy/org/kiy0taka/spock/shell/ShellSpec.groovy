@@ -47,6 +47,18 @@ class ShellSpec extends Specification {
         exec([new File(config.script.dir, scriptName).absolutePath, *args].join(' '))
     }
 
+    void resources(String path){
+        def resourcesPath = getClass().getResource("/${path}")
+        if(!resourcesPath) throw new FileNotFoundException("resources directory [${path}] not found.")
+
+        def dir = new File(resourcesPath.toURI())
+        if (dir.isDirectory()) {
+            new AntBuilder().copy(todir:workspace.absolutePath) {
+                fileset(dir:dir.absolutePath)
+            }
+        }
+    }
+
     int getStatus() {
         currentProc.status
     }
