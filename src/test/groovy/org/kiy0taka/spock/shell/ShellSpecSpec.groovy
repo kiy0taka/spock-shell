@@ -98,4 +98,30 @@ class ShellSpecSpec extends ShellSpec {
         then:
         lines[0] == 'this is hoge.txt'
     }
+
+    def 'copy resources to the workspace'() {
+        given:
+        resources 'test2'
+        when:
+        exec 'ls -1'
+        then:
+        stdout == '''foo.txt
+                     |sub-folder
+                     |'''.stripMargin()
+
+        when:
+        exec 'ls -1 sub-folder'
+        then:
+        stdout == '''foo2.txt
+                     |'''.stripMargin()
+    }
+
+    def 'not exist resources directory should throws exception'() {
+        when:
+        resources 'hoge2'
+
+        then:
+        thrown(FileNotFoundException)
+
+    }
 }
