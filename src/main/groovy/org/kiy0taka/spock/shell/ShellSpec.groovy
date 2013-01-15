@@ -2,6 +2,7 @@ package org.kiy0taka.spock.shell
 
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.junit.rules.TestName
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -9,6 +10,9 @@ class ShellSpec extends Specification {
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder()
+
+    @Rule
+    public TestName testName = new TestName()
 
     @Shared
     private static ConfigObject config = {
@@ -20,6 +24,14 @@ class ShellSpec extends Specification {
     private List<String> mockScripts = []
     private ShellProc currentProc
     private boolean redirectErrorStream
+
+    void cleanup() {
+        def reportDir = new File(config.report.dir ?: 'build/reports/spock-shell')
+        def dir = new File(new File(reportDir, getClass().canonicalName.replaceAll(/\./, '/')), testName.methodName)
+        new AntBuilder().copy(todir:dir.absolutePath) {
+            fileset(dir:workspace.absolutePath)
+        }
+    }
 
     File getWorkspace() {
         tempFolder.root
