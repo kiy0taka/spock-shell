@@ -24,6 +24,7 @@ class ShellSpec extends Specification {
     private List<String> mockScripts = []
     private ShellProc currentProc
     private boolean redirectErrorStream
+    private Map<String, Closure> mockFunctions = [:]
 
     void cleanup() {
         def reportDir = new File(config.report.dir ?: 'build/reports/spock-shell')
@@ -45,13 +46,18 @@ class ShellSpec extends Specification {
         mockScripts << new File(config.script.dir, script).absolutePath
     }
 
+    void mockFunction(String name, Closure mock) {
+        mockFunctions[name] = mock
+    }
+
     void exec(String command) {
         currentProc = new ShellProc(
             dir:tempFolder.root,
             env:env,
             mockScripts:mockScripts,
             command:command,
-            redirectErrorStream:redirectErrorStream)
+            redirectErrorStream:redirectErrorStream,
+            mockFunctions:mockFunctions)
         currentProc.exec()
     }
 

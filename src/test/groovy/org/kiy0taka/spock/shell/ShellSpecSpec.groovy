@@ -115,4 +115,69 @@ class ShellSpecSpec extends ShellSpec {
         thrown(FileNotFoundException)
 
     }
+
+    def 'assert stdout, use mock function'() {
+        given:
+        mockFunction('curl') { args ->
+            println "called curl ${args}"
+        }
+
+        when:
+        exec 'curl http://www.example.org'
+
+        then:
+        lines[0] == 'called curl [http://www.example.org]'
+    }
+
+    def 'assert stderr, use mock function'() {
+        given:
+        mockFunction('curl') { args ->
+            System.err.println "called curl ${args}"
+        }
+
+        when:
+        exec 'curl http://www.example.org'
+
+        then:
+        stderr == 'called curl [http://www.example.org]\n'
+    }
+
+    def 'assert stdout/stderr, use mock function'() {
+        given:
+        mockFunction('curl') { args ->
+            println '1'
+            System.err.println '2'
+            println '3'
+            System.err.println '4'
+        }
+
+        when:
+        exec 'curl http://www.example.org'
+
+        then:
+        stdout == '1\n3\n'
+
+        and:
+        stderr == '2\n4\n'
+    }
+
+    def 'redirect error stream, use mock function'() {
+        given:
+        mockFunction('curl') { args ->
+            println '1'
+            System.err.println '2'
+            println '3'
+            System.err.println '4'
+        }
+        redirectErrorStream true
+
+        when:
+        exec 'curl http://www.example.org'
+
+        then:
+        stdout == '1\n2\n3\n4\n'
+
+        and:
+        stderr == ''
+    }
 }
