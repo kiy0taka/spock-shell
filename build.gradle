@@ -37,6 +37,14 @@ uploadArchives {
         repository(url: kiy0takaRepoUrl) {
             authentication(userName: kiy0takaRepoUserName, privateKey: kiy0takaRepoPrivateKey)
         }
+        pom.project {
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                }
+            }
+        }
     }
 }
 
