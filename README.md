@@ -3,6 +3,10 @@
 
 [![Build Status](https://buildhive.cloudbees.com/job/kiy0taka/job/spock-shell/badge/icon)](https://buildhive.cloudbees.com/job/kiy0taka/job/spock-shell/)
 
+## License
+
+Apache License, Version 2.0
+
 ## Gradle settings
 
     apply plugin: 'groovy'
@@ -18,9 +22,14 @@
     }
 
 ## Configuration
-Add ShellSpec.groovy to src/test/groovy.
+src/test/groovy/ShellSpec.groovy
 
-    script.dir = 'shell' // path to shell script directory.
+key|required|default|description
+---|--------|-------|-----------
+script.dir|yes| - |path to shell script directory.
+report.dir|no|build/reports/spock-shell|path to report directory.
+
+See https://github.com/kiy0taka/spock-shell/blob/master/src/test/groovy/ShellSpecConfig.groovy
 
 ## Sample
 
@@ -50,7 +59,7 @@ stderr|String|Standard Error
 lines|List&lt;String&gt;|Standard Output lines
 workspace|File|Shell working directory
 
-### Mock
+### Mock (Shell)
 
 * mock.sh
 
@@ -66,12 +75,27 @@ workspace|File|Shell working directory
 
         setup:
         mockScript 'mock.sh'
-        
+
         when:
         run 'run.sh'
-        
+
         then:
         lines[0] == 'called curl http://www.google.com'
+
+### Mock (Groovy)
+
+    given:
+    mockFunction('curl') { args ->
+        new File(workspace, 'index.html').text = 'Hello World'
+    }
+
+    when:
+    exec 'curl -O index.html http://www.example.org'
+
+    then:
+    def downloaded = new File(workspace, 'index.html')
+    downloaded.exists()
+    downloaded.text == 'Hello World'
 
 ### Test resources
 
