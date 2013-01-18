@@ -7,10 +7,16 @@ import spock.lang.Specification
  */
 class MockFunctionSpec extends Specification {
 
+    ShellContext ctx
+
+    void setup() {
+        ctx = Mock()
+    }
+
     def "stdout"() {
 
         setup:
-        def mock = new MockFunction(func:{
+        def mock = new MockFunction(ctx:ctx, func:{
             println 'Hello World'
         })
 
@@ -26,7 +32,7 @@ class MockFunctionSpec extends Specification {
     def "stderr"() {
 
         setup:
-        def mock = new MockFunction(func:{
+        def mock = new MockFunction(ctx:ctx, func:{
             System.err.println 'Hello World'
         })
 
@@ -42,7 +48,7 @@ class MockFunctionSpec extends Specification {
     def "stdout & stderr"() {
 
         setup:
-        def mock = new MockFunction(func:{
+        def mock = new MockFunction(ctx:ctx, func:{
             println '1'
             System.err.println '2'
             println '3'
@@ -66,12 +72,13 @@ class MockFunctionSpec extends Specification {
     def "redirect error stream"() {
 
         setup:
-        def mock = new MockFunction(func:{
+        ctx.isRedirectErrorStream() >> true
+        def mock = new MockFunction(ctx:ctx, func:{
             println '1'
             System.err.println '2'
             println '3'
             System.err.println '4'
-        }, redirectErrorStream:true)
+        })
 
         when:
         def actual = mock.exec()
@@ -88,7 +95,7 @@ class MockFunctionSpec extends Specification {
     def "print without line"() {
 
         setup:
-        def mock = new MockFunction(func:{
+        def mock = new MockFunction(ctx:ctx, func:{
             print 'Hello World'
         })
 

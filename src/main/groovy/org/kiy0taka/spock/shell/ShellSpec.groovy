@@ -15,11 +15,17 @@
  */
 package org.kiy0taka.spock.shell
 
+import com.sun.net.httpserver.HttpServer
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.junit.rules.TestName
+import org.kiy0taka.spock.shell.server.MockFunctionHandler
+import org.kiy0taka.spock.shell.server.ParamsFilter
+import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
+
+import java.util.concurrent.Executors
 
 /**
  * Spock extension for shell script.
@@ -41,11 +47,12 @@ class ShellSpec extends Specification {
         new ConfigSlurper().parse(r)
     }()
 
-    private Map<String, String> env = [:]
-    private List<String> mockScripts = []
+    private ShellContext ctx
     private ShellProc currentProc
-    private boolean redirectErrorStream
-    private Map<String, Closure> mockFunctions = [:]
+
+    void setup() {
+        ctx = new ShellContext(workspace:tempFolder.root, config:config)
+    }
 
     void cleanup() {
         def reportDir = new File(config.report.dir ?: 'build/reports/spock-shell')
@@ -53,33 +60,28 @@ class ShellSpec extends Specification {
         new AntBuilder().copy(todir:dir.absolutePath) {
             fileset(dir:workspace.absolutePath)
         }
+        ctx.close()
     }
 
     File getWorkspace() {
-        tempFolder.root
+        ctx.workspace
     }
 
     void export(String name, String value) {
-        env[name] = value
+        ctx.export(name, value)
     }
 
     void mockScript(String script) {
-        mockScripts << new File(config.script.dir, script).absolutePath
+        ctx.addMockScript(script)
     }
 
     void mockFunction(String name, Closure mock) {
-        mockFunctions[name] = mock
+        ctx.addMockFunction(name, mock)
     }
 
     void exec(String command) {
-        currentProc = new ShellProc(
-            dir:tempFolder.root,
-            env:env,
-            mockScripts:mockScripts,
-            command:command,
-            redirectErrorStream:redirectErrorStream,
-            mockFunctions:mockFunctions)
-        currentProc.exec()
+        currentProc = new ShellProc(ctx:ctx)
+        currentProc.exec(command)
     }
 
     void run(String scriptName, String... args) {
@@ -88,7 +90,7 @@ class ShellSpec extends Specification {
 
     void resources(String path){
         def resourcesPath = getClass().getResource("/${path}")
-        if(!resourcesPath) throw new FileNotFoundException("resources directory [${path}] not found.")
+        if (!resourcesPath) throw new FileNotFoundException("resources directory [${path}] not found.")
 
         def dir = new File(resourcesPath.toURI())
         if (dir.isDirectory()) {
@@ -115,6 +117,7 @@ class ShellSpec extends Specification {
     }
 
     void redirectErrorStream(boolean redirectErrorStream) {
-        this.redirectErrorStream = redirectErrorStream
+        ctx.redirectErrorStream = redirectErrorStream
     }
+
 }

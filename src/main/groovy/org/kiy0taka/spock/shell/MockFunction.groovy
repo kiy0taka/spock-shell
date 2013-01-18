@@ -24,27 +24,47 @@ import groovy.ui.SystemOutputInterceptor
  */
 class MockFunction {
 
-    boolean redirectErrorStream
+    ShellContext ctx
+    String name
     Closure func
 
+    String toCommand() {
+        """\
+        |function $name {
+        |    local command len
+        |    command="curl -s http://localhost:${ctx.serverPort}/$name"
+        |    len=\$#
+        |    for ((i=0; i<\${len}; i++))
+        |    do
+        |        command="\$command --data-urlencode args\${i}=\$1"
+        |        shift
+        |    done
+        |    exec \$command | sh
+        |}
+        |""".stripMargin()
+    }
+
     String exec(List args) {
+
         def stdout = new Out()
-        def stderr = redirectErrorStream ? stdout : new Out(error:true)
+        def stderr = ctx.redirectErrorStream ? stdout : new Out(error:true)
+
         def interceptors = [
             new SystemOutputInterceptor({ stdout.append(it); false }),
             new SystemOutputInterceptor({ stderr.append(it); false }, false)
         ]
         interceptors*.start()
+
         try {
             func(args)
         } finally {
             interceptors*.stop()
         }
 
-        if (redirectErrorStream) {
+        if (ctx.redirectErrorStream) {
             stdout.toString()
         } else {
-            [stdout.toString(), stderr.toString()].grep().join('\n')
+            [stdout, stderr]*.toString().grep().join('\n')
         }
     }
 
