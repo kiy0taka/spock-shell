@@ -24,9 +24,13 @@ class MockFunctionSpec extends Specification {
         def actual = mock.exec()
 
         then:
-        actual == '''|cat << EOF
+        actual == '''|__spock_shell_result() {
+                     |cat << EOF
                      |Hello World
-                     |EOF'''.stripMargin()
+                     |EOF
+                     |return 0
+                     |}
+                     |__spock_shell_result'''.stripMargin()
     }
 
     def "stderr"() {
@@ -40,9 +44,13 @@ class MockFunctionSpec extends Specification {
         def actual = mock.exec()
 
         then:
-        actual == '''|cat >&2 << EOF
+        actual == '''|__spock_shell_result() {
+                     |cat >&2 << EOF
                      |Hello World
-                     |EOF'''.stripMargin()
+                     |EOF
+                     |return 0
+                     |}
+                     |__spock_shell_result'''.stripMargin()
     }
 
     def "stdout & stderr"() {
@@ -59,14 +67,18 @@ class MockFunctionSpec extends Specification {
         def actual = mock.exec()
 
         then:
-        actual == '''|cat << EOF
+        actual == '''|__spock_shell_result() {
+                     |cat << EOF
                      |1
                      |3
                      |EOF
                      |cat >&2 << EOF
                      |2
                      |4
-                     |EOF'''.stripMargin()
+                     |EOF
+                     |return 0
+                     |}
+                     |__spock_shell_result'''.stripMargin()
     }
 
     def "redirect error stream"() {
@@ -84,12 +96,16 @@ class MockFunctionSpec extends Specification {
         def actual = mock.exec()
 
         then:
-        actual == '''|cat << EOF
+        actual == '''|__spock_shell_result() {
+                     |cat << EOF
                      |1
                      |2
                      |3
                      |4
-                     |EOF'''.stripMargin()
+                     |EOF
+                     |return 0
+                     |}
+                     |__spock_shell_result'''.stripMargin()
     }
 
     def "print without line"() {
@@ -103,8 +119,12 @@ class MockFunctionSpec extends Specification {
         def actual = mock.exec()
 
         then:
-        actual == '''|cat << EOF
+        actual == '''|__spock_shell_result() {
+                     |cat << EOF
                      |Hello World
-                     |EOF'''.stripMargin()
+                     |EOF
+                     |return 0
+                     |}
+                     |__spock_shell_result'''.stripMargin()
     }
 }

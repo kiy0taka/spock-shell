@@ -91,10 +91,13 @@ class ShellSpecSpec extends ShellSpec {
     }
 
     def 'copy resources to the workspace'() {
-        given:
+
+        given: 'copy src/test/resources/test2 to workspace'
         resources 'test2'
+
         when:
         exec 'ls -1'
+
         then:
         stdout == '''foo.txt
                      |sub-folder
@@ -102,18 +105,18 @@ class ShellSpecSpec extends ShellSpec {
 
         when:
         exec 'ls -1 sub-folder'
+
         then:
         stdout == '''foo2.txt
                      |'''.stripMargin()
     }
 
     def 'not exist resources directory should throws exception'() {
-        when:
-        resources 'hoge2'
+        when: 'no such directory src/test/resources/hoge.'
+        resources 'hoge'
 
         then:
         thrown(FileNotFoundException)
-
     }
 
     def 'assert stdout, use mock function'() {
@@ -179,5 +182,42 @@ class ShellSpecSpec extends ShellSpec {
 
         and:
         stderr == ''
+    }
+
+    def 'mock function status'() {
+        given:
+        mockFunction('curl') {
+            return arg
+        }
+
+        when:
+        exec 'curl http://www.example.org'
+
+        then:
+        status == expected
+
+        where:
+        arg  | expected
+        0    | 0
+        1    | 1
+        null | 0
+        'a'  | 0
+        '1'  | 0
+    }
+
+    def 'mock function throws Exception'() {
+        given:
+        mockFunction('curl') {
+            throw new RuntimeException('error!')
+        }
+
+        when:
+        exec 'curl http://www.example.org'
+
+        then:
+        status == 255
+
+        and:
+        stderr.split(/\n/)[0] == 'java.lang.RuntimeException: error!'
     }
 }

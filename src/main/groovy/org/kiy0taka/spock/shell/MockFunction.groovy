@@ -46,6 +46,7 @@ class MockFunction {
 
     String exec(List args) {
 
+        def status
         def stdout = new Out()
         def stderr = ctx.redirectErrorStream ? stdout : new Out(error:true)
 
@@ -56,16 +57,25 @@ class MockFunction {
         interceptors*.start()
 
         try {
-            func(args)
+            def result = func(args)
+            if (result in Number) {
+                status = result
+            } else {
+                status = 0
+            }
+        } catch (e) {
+            e.printStackTrace()
+            status = 255
         } finally {
             interceptors*.stop()
         }
 
-        if (ctx.redirectErrorStream) {
-            stdout.toString()
-        } else {
-            [stdout, stderr]*.toString().grep().join('\n')
-        }
+        """\
+        |__spock_shell_result() {
+        |${ctx.redirectErrorStream ? stdout.toString() : [stdout, stderr]*.toString().grep().join('\n')}
+        |return $status
+        |}
+        |__spock_shell_result""".stripMargin()
     }
 
     static class Out {
