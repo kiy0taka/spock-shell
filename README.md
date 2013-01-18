@@ -18,7 +18,7 @@ Apache License, Version 2.0
 
     dependencies {
         groovy 'org.codehaus.groovy:groovy-all:2.0.6'
-        testCompile 'org.kiy0taka.spock:spock-shell:0.2'
+        testCompile 'org.kiy0taka.spock:spock-shell:0.4'
     }
 
 ## Configuration
